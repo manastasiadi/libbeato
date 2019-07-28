@@ -333,18 +333,6 @@ const struct fofBatch *b = *((struct fofBatch **)vb);
 return strcmp(a->key, b->key);
 }
 
-static int cmpOnFilePos(const void *va, const void *vb)
-/* Comparison function for qsort on an array of offset pointers.
- * Sorts on file then file offset. */
-{
-const struct fofBatch *a = *((struct fofBatch **)va);
-const struct fofBatch *b = *((struct fofBatch **)vb);
-int dif = a->f - b->f;
-if (dif == 0)
-    dif = a->offset - b->offset;
-return dif;
-}
-
 static void elFromRec(struct fof *fof, struct fofRecord *rec, struct fofBatch *el)
 /* Fill in a batch element from record. */
 {
@@ -361,43 +349,6 @@ else
 el->offset = rec->offset;
 el->size = rec->size;
 }
-
-struct fofBatch *fofBatchFind(struct fof *fof, struct fofBatch *list)
-/* Look up all of members on list. */
-{
-struct fofBatch *el;
-FILE *f = fof->f;
-struct fofRecord *rec = fof->rec;
-int itemSize = fof->itemSize;
-char *lastKey = "";
-
-slSort(&list, cmpOnKey);
-fseek(f, fof->headSize, SEEK_SET);
-for (el = list; el != NULL; el = el->next)
-    {
-    char *key = el->key;
-    if (sameString(key, lastKey))
-        {
-        elFromRec(fof, rec, el);
-        }
-    else
-        {
-        for (;;)
-            {
-            mustRead(f, rec, itemSize);
-            if (sameString(key, rec->name))
-                {
-                elFromRec(fof, rec, el);
-                lastKey = key;
-                break;
-                }
-            }
-        }
-    }
-slSort(&list, cmpOnFilePos);
-return list;
-}
-
 
 /* ------------------- Write Side ------------------------*/
 

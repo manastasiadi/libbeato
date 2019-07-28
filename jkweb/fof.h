@@ -76,7 +76,4 @@ struct fofBatch
     bits32 offset;          /* Offset in file - filled in by server. */
     bits32 size;            /* Size in file - filled in by server. */
     };
- 
-struct fofBatch *fofBatchFind(struct fof *fof, struct fofBatch *list);
-/* Look up all of members on list. */
 
